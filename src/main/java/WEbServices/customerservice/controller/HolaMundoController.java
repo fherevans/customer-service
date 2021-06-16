@@ -10,6 +10,7 @@ public class HolaMundoController {
 
  @GetMapping("/hola")
     public ResponseEntity<Object> holaMundo() {
+
      return new ResponseEntity<>("Hola Mundo", HttpStatus.ACCEPTED);
  }
 }
