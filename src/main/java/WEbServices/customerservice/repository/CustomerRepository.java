@@ -4,6 +4,7 @@ import WEbServices.customerservice.dto.Customer;
 import WEbServices.customerservice.dto.Region;
 import WEbServices.customerservice.dto.RespuestaApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -20,53 +21,11 @@ public class CustomerRepository {
     JdbcTemplate jdbcTemplate;
 
     public List<Customer> getCustomers(){
-        List<Customer> customers = new ArrayList<>();
-        customers = jdbcTemplate.query("SELECT * FROM customer c, region r WHERE c.id_region = r.id;", new RowMapper<Customer>(){
-
-            @Override
-            public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Customer customer = new Customer();
-                customer.setId(rs.getInt(1));
-                customer.setNombre(rs.getString(2));
-                customer.setApellidos(rs.getString(3));
-                customer.setRfc(rs.getString(4));
-                customer.setCorreo(rs.getString(5));
-
-                Region region = new Region();
-                region.setId(rs.getInt(7));
-                region.setRegion(rs.getString(8));
-
-                customer.setRegion(region);
-
-                return customer;
-            }
-        });
-        return customers;
+       return jdbcTemplate.query("SELECT * FROM customer", new BeanPropertyRowMapper<Customer>(Customer.class));
     }
 
     public Customer getCustomer(int id){
-        Customer customer = new Customer();
-        customer = jdbcTemplate.queryForObject("SELECT * FROM customer c, region r WHERE c.id_region = r.id AND c.id ="+id+";", new RowMapper<Customer>(){
-
-            @Override
-            public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Customer customer = new Customer();
-                customer.setId(rs.getInt(1));
-                customer.setNombre(rs.getString(2));
-                customer.setApellidos(rs.getString(3));
-                customer.setRfc(rs.getString(4));
-                customer.setCorreo(rs.getString(5));
-
-                Region region = new Region();
-                region.setId(rs.getInt(7));
-                region.setRegion(rs.getString(8));
-
-                customer.setRegion(region);
-
-                return customer;
-            }
-        });
-        return customer;
+        return jdbcTemplate.queryForObject("SELECT * FROM customer WHERE id = "+id+";", new BeanPropertyRowMapper<Customer>(Customer.class));
     }
 
     public RespuestaApi createCustomer(Customer customer){
@@ -75,7 +34,7 @@ public class CustomerRepository {
                 + "'" + customer.getApellidos() + "',"
                 + "'" + customer.getRfc() + "',"
                 + "'" + customer.getCorreo() + "',"
-                + "'" + customer.getRegion().getId() + "'"
+                +  " " + customer.getIdRegion()
                 + ");");
         return new RespuestaApi("El cliente ha sido registrado");
     }
@@ -86,7 +45,7 @@ public class CustomerRepository {
                 + "apellidos = '" + customer.getApellidos() + "',"
                 + "rfc = '" + customer.getRfc() + "',"
                 + "correo = '" + customer.getCorreo() + "',"
-                + "id_region = " + customer.getRegion().getId()
+                + "id_region = " + customer.getIdRegion()
                 + " WHERE id = " + id + ";");
         return new RespuestaApi("El cliente ha sido actualizado");
     }
